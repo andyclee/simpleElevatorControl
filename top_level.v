@@ -55,7 +55,7 @@ module top_level(
     
     input_manager im(im_write_floor, im_in_out, im_call_dir, im_floor_called, button_down, button_up, button_in, sw[5:3], sw[2:0]);
     controller ctrl(ctrl_should_move, ctrl_call_inside, ctrl_call_up, ctrl_call_down, ctrl_floor_out, ctrl_direction, sim_floor_out, im_write_floor, im_floor_called, im_in_out, im_call_dir, sim_floor_reached, clkout, reset);
-    simulator sim(sim_floor_out, sim_direction_out, sim_floor_reached, ctrl_floor_out, ctrl_direction, ctrl_call_in, ctrl_call_up, ctrl_call_down, ctrl_should_move, clkout);
+    simulator sim(sim_floor_out, sim_direction_out, sim_floor_reached, ctrl_floor_out, ctrl_direction, ctrl_call_inside, ctrl_call_up, ctrl_call_down, ctrl_should_move, clkout);
     display_adapter da(led0, floor_seg, dir_seg, sim_direction_out, sim_floor_out, sim_floor_reached);
 
     mux2v #(4) m(seg, floor_seg, dir_seg, clkout);

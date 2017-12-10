@@ -9,14 +9,13 @@ module simulator(cur_floor_out, direction_out, open, cur_floor_in, direction_in,
 	input   clock;
 
 	wire [3:0] control;
-	wire dirOut;
 	wire [2:0] floorOut;
 
 	floorChecker fc(open, cur_floor_in, direction_in, call_in, call_up, call_down);
 	mux2v subOrAdd(control, 3'h2, 3'h3, direction_in);
 	alu32 modFloor(floorOut, , , , cur_floor_in, move_in, control);
 
-	mux2v dirMux(direction_out, direction_in, dirOut, clock);
+    assign direction_out = direction_in;
 	mux2v floorMux(cur_floor_out, cur_floor_in, floorOut, clock);
 
 endmodule //simulator
@@ -30,7 +29,7 @@ module floorChecker(open, cur_floor, direction, call_in, call_up, call_down);
 	wire [7:0] decOut;
 	wire [7:0] inOut, upOut, downOut;
 
-	decoder8 floorDec(decOut, cur_floor, 1'b1);
+	decoder8 floorDec(decOut, cur_floor, 2'b11);
 	
 	assign inOut[0] = call_in[0] & decOut[0];
 	assign inOut[1] = call_in[1] & decOut[1];
@@ -59,6 +58,7 @@ module floorChecker(open, cur_floor, direction, call_in, call_up, call_down);
 	assign downOut[6] = call_down[6] & decOut[6] & ~direction;
 	assign downOut[7] = call_down[7] & decOut[7] & ~direction;
 
-	or outOr(inOut[0], upOut[0], downOut[0], inOut[1], upOut[1], downOut[1], inOut[2], upOut[2], downOut[2], inOut[3], upOut[3], downOut[3], inOut[4], upOut[4], downOut[4], inOut[5], upOut[5], downOut[5], inOut[6], upOut[6], downOut[6], inOut[7], upOut[7], downOut[7]);
+	or outOr(open, inOut[0], upOut[0], downOut[0], inOut[1], upOut[1], downOut[1], inOut[2], upOut[2], downOut[2], inOut[3], upOut[3], downOut[3], inOut[4], upOut[4], downOut[4], inOut[5], upOut[5], downOut[5], inOut[6], upOut[6], downOut[6], inOut[7], upOut[7], downOut[7]);
 
 endmodule //floorChecker
+

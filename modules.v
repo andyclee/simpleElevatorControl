@@ -53,7 +53,6 @@ module decoder4(out, in, enable);
 	input [1:0]	in;
 	input		enable;
 	output [3:0]	out;
-	wire [1:0]	w_enable;
 
 	decoder2 out0(out[1:0], in[0], enable & ~in[1]);
 	decoder2 out1(out[3:2], in[0], enable & in[1]);
@@ -63,7 +62,6 @@ module decoder8(out, in, enable);
 	input [2:0]	in;
 	input		enable;
 	output [7:0]	out;
-	wire [1:0]	w_enable;
 
 	decoder4 out0(out[3:0], in[1:0], enable & ~in[2]);
 	decoder4 out1(out[7:4], in[1:0], enable & in[2]);
@@ -126,9 +124,9 @@ module DirectionCalculator(direction, shouldMove, floorsCalled, currentFloor, cl
     assign shouldMove = (sDown | sUp);
     assign direction = sUp;
 
-    dffe fsChoose(sChoose, choose_next, clock, 1'b1, 1'b0);
-    dffe fsUp(sUp, up_next, clock, 1'b1, 1'b0);
-    dffe fsDown(sDown, down_next, clock, 1'b1, 1'b0);
+    dffe #(1, 0) fsChoose(sChoose, choose_next, clock, 1'b1, 1'b0);
+    dffe #(1, 0) fsUp(sUp, up_next, clock, 1'b1, 1'b0);
+    dffe #(1, 0) fsDown(sDown, down_next, clock, 1'b1, 1'b0);
 //    output goingUp;
 //    input [2:0] currentFloor;
 //    input [7:0] floorsCalled;

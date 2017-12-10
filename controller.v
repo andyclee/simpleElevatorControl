@@ -20,14 +20,14 @@ module controller(should_move, call_inside, call_up, call_down, cur_floor_out, d
 
 	wire [7:0] call_all, rf_call_up, rf_call_down, rf_call_inside;
 	wire [5:0] wr_data;
-	wire curr_dir;
 
 	assign wr_data[2:0] = write_floor; //Floor
 	assign wr_data[3] = in_out; //Called inside
 	assign wr_data[4] = call_dir;
 	assign wr_data[5] = floor_called & ~floor_reached;
 
-	regfile rf(rf_call_inside, rf_call_up, rf_call_down, wr_data, wr_floor, clk, reset);
+	regfile rf(rf_call_inside, rf_call_up, rf_call_down, wr_data, write_floor, clk, reset);
+    assign call_all[0] = rf_call_up[0] | rf_call_down[0] | rf_call_inside[0];
 	assign call_all[1] = rf_call_up[1] | rf_call_down[1] | rf_call_inside[1];
     assign call_all[2] = rf_call_up[2] | rf_call_down[2] | rf_call_inside[2];
     assign call_all[3] = rf_call_up[3] | rf_call_down[3] | rf_call_inside[3];
@@ -61,7 +61,7 @@ module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call
 	output floorCalled;
 	input call_up, call_down;
 	input button_call;
-	input [3:0] in_floor, out_floor;
+	input [2:0] in_floor, out_floor;
 
 	wire floorCalled;
 
