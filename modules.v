@@ -198,6 +198,7 @@ module DownCounter(count, floorsCalled, currentFloor);
     alu32 comp4( , , , fcomp4, currentFloor, 32'b101, `ALU_SUB);
     alu32 comp5( , , , fcomp5, currentFloor, 32'b110, `ALU_SUB);
     alu32 comp6( , , , fcomp6, currentFloor, 32'b111, `ALU_SUB);
+
     // decoders
     decoder2 d0({isUpper0, isLower0}, 1'b1, ~fcomp0);
     decoder2 d1({isUpper1, isLower1}, 1'b1, ~fcomp1);
