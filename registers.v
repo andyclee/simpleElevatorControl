@@ -1,23 +1,20 @@
-// Registers for elevator floors
 module register(q, d, enable, clk, reset);
-	parameter
-		width = 32,
-		reset_value = 0;
 
-	output [(width-1):0] q;
-	reg    [(width-1):0] q;
-	input  [(width-1):0] d;
-	input	clk, enable, reset;
-
-	always@(reset)
-		if (reset == 1'b1)
-			q <= reset_value;
-
-	always@(posedge clk)
-		if ((reset == 1'b0) && (enable == 1'b1))
-			q <= d;
-	
-endmodule //register
+    parameter
+        width = 32,
+        reset_value = 0;
+ 
+    output reg [(width-1):0] q;
+    input  [(width-1):0] d;
+    input                clk, enable, reset;
+ 
+    always@(posedge clk or posedge reset)
+      if (reset == 1'b1)
+        q <= reset_value;
+      else if (enable == 1'b1)
+        q <= d;
+    
+endmodule // register
 
 //call_mask = floor called from outside
 //floors = floor called from inside
