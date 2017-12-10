@@ -27,13 +27,13 @@ module controller(should_move, call_inside, call_up, call_down, cur_floor_out, d
 	assign wr_data[5] = floor_called & ~floor_reached;
 
 	regfile rf(call_inside, call_up, call_down, wr_data, wr_floor, clk, reset);
-	or cfCombinedMask(call_all, call_inside, call_up, call_down)
+	or cfCombinedMask(call_all, call_inside, call_up, call_down);
 
 	//Used for calculation and display
 	register #(3, 0) currentFloor(cur_floor_out, cur_floor_in, 1'b1, clk, reset);
 
 	DirectionCalculator dc(direction, should_move, cur_floor_out, call_all);
-endmodule; //controller
+endmodule //controller
 
 //call_down/call_up is the direction of the elevator call (up/down) (dpad button
 //up/down)
@@ -47,9 +47,9 @@ module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call
 	output [3:0] write_floor;
 	output in_out;
 	output call_dir;
-	input call_up, call_down, in_out;
+	input call_up, call_down;
 	input button_call;
-	input [3:0] in_floor, out_floor
+	input [3:0] in_floor, out_floor;
 
 	wire floorCalled;
 
@@ -57,4 +57,5 @@ module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call
 	assign floorCalled = in_out | button_call;
 	mux2v wfMux(write_floor, out_floor, in_floor, in_out);
 	assign call_dir = call_up;
-endmodule; //input_manager
+endmodule //input_manager
+

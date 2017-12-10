@@ -14,7 +14,7 @@ module register(q, d, enable, clk, reset);
 			q <= reset_value;
 
 	always@(posedge clk)
-		if ((reset == 1;b0) && (enable == 1'b1))
+		if ((reset == 1'b0) && (enable == 1'b1))
 			q <= d;
 	
 endmodule //register
@@ -52,22 +52,23 @@ module regfile(call_inside, call_up, call_down, wr_data, wr_regnum, clk, reset);
 	assign call_inside[6] = regOut[6][3] & regOut[6][5];
 	assign call_inside[7] = regOut[7][3] & regOut[7][5];
 
-	assign call_up[0] = ~regOut[0][3] & regOut[0[4] & regOut[0][5];
-	assign call_up[1] = ~regOut[1][3] & regOut[1[4] & regOut[1][5];
-	assign call_up[2] = ~regOut[2][3] & regOut[2[4] & regOut[2][5];
-	assign call_up[3] = ~regOut[3][3] & regOut[3[4] & regOut[3][5];
-	assign call_up[4] = ~regOut[4][3] & regOut[4[4] & regOut[4][5];
-	assign call_up[5] = ~regOut[5][3] & regOut[5[4] & regOut[5][5];
-	assign call_up[6] = ~regOut[6][3] & regOut[6[4] & regOut[6][5];
-	assign call_up[7] = ~regOut[7][3] & regOut[7[4] & regOut[7][5];
+	assign call_up[0] = ~regOut[0][3] & regOut[0][4] & regOut[0][5];
+	assign call_up[1] = ~regOut[1][3] & regOut[1][4] & regOut[1][5];
+	assign call_up[2] = ~regOut[2][3] & regOut[2][4] & regOut[2][5];
+	assign call_up[3] = ~regOut[3][3] & regOut[3][4] & regOut[3][5];
+	assign call_up[4] = ~regOut[4][3] & regOut[4][4] & regOut[4][5];
+	assign call_up[5] = ~regOut[5][3] & regOut[5][4] & regOut[5][5];
+	assign call_up[6] = ~regOut[6][3] & regOut[6][4] & regOut[6][5];
+	assign call_up[7] = ~regOut[7][3] & regOut[7][4] & regOut[7][5];
 
-	assign call_down[0] = ~regOut[0][3] & ~regOut[0[4] & regOut[0][5];
-	assign call_down[1] = ~regOut[1][3] & ~regOut[1[4] & regOut[1][5];
-	assign call_down[2] = ~regOut[2][3] & ~regOut[2[4] & regOut[2][5];
-	assign call_down[3] = ~regOut[3][3] & ~regOut[3[4] & regOut[3][5];
-	assign call_down[4] = ~regOut[4][3] & ~regOut[4[4] & regOut[4][5];
-	assign call_down[5] = ~regOut[5][3] & ~regOut[5[4] & regOut[5][5];
-	assign call_down[6] = ~regOut[6][3] & ~regOut[6[4] & regOut[6][5];
-	assign call_down[7] = ~regOut[7][3] & ~regOut[7[4] & regOut[7][5];
+	assign call_down[0] = ~regOut[0][3] & ~regOut[0][4] & regOut[0][5];
+	assign call_down[1] = ~regOut[1][3] & ~regOut[1][4] & regOut[1][5];
+	assign call_down[2] = ~regOut[2][3] & ~regOut[2][4] & regOut[2][5];
+	assign call_down[3] = ~regOut[3][3] & ~regOut[3][4] & regOut[3][5];
+	assign call_down[4] = ~regOut[4][3] & ~regOut[4][4] & regOut[4][5];
+	assign call_down[5] = ~regOut[5][3] & ~regOut[5][4] & regOut[5][5];
+	assign call_down[6] = ~regOut[6][3] & ~regOut[6][4] & regOut[6][5];
+	assign call_down[7] = ~regOut[7][3] & ~regOut[7][4] & regOut[7][5];
 
-~endmodule //register
+endmodule //register
+
