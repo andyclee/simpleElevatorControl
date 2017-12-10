@@ -58,7 +58,7 @@ module top_level(
     simulator sim(sim_floor_out, sim_direction_out, sim_floor_reached, ctrl_floor_out, ctrl_direction, ctrl_call_inside, ctrl_call_up, ctrl_call_down, ctrl_should_move, clkout);
     display_adapter da(led0, floor_seg, dir_seg, sim_direction_out, sim_floor_out, sim_floor_reached);
 
-    mux2v #(4) m(seg, floor_seg, dir_seg, clkout);
+    mux2v #(7) m(seg, floor_seg, dir_seg, clkout);
     assign an[3] = 1'b1;
     assign an[2] = 1'b1;
     assign an[1] = ~clkout;
