@@ -6,6 +6,7 @@ module simulator(cur_floor_out, direction_out, open, cur_floor_in, direction_in,
 	input	[2:0] cur_floor_in;
 	input	direction_in;
 	input	move_in;
+	input   clock;
 
 	wire [3:0] control;
 	wire dirOut;
@@ -26,10 +27,10 @@ module floorChecker(open, cur_floor, direction, call_in, call_up, call_down);
 	input direction;
 	input [7:0] call_in, call_up, call_down;
 
-	wire [7:0] floorDecOut;
+	wire [7:0] decOut;
 	wire [7:0] inOut, upOut, downOut;
 
-	decoder8 floorDec(floorDecOut, cur_floor, 1'b1);
+	decoder8 floorDec(decOut, cur_floor, 1'b1);
 	
 	assign inOut[0] = call_in[0] & decOut[0];
 	assign inOut[1] = call_in[1] & decOut[1];
@@ -61,4 +62,3 @@ module floorChecker(open, cur_floor, direction, call_in, call_up, call_down);
 	or outOr(inOut[0], upOut[0], downOut[0], inOut[1], upOut[1], downOut[1], inOut[2], upOut[2], downOut[2], inOut[3], upOut[3], downOut[3], inOut[4], upOut[4], downOut[4], inOut[5], upOut[5], downOut[5], inOut[6], upOut[6], downOut[6], inOut[7], upOut[7], downOut[7]);
 
 endmodule //floorChecker
-

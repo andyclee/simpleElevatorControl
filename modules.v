@@ -6,16 +6,19 @@
 `define ALU_XOR    3'h7
 
 module dffe(q, d, clk, enable, reset);
-    output q;
-    reg    q;
-    input  d;
-    input  clk, enable, reset;
-    always@(reset)
-      if (reset == 1'b1)
-        q <= 0;
-    always@(posedge clk)
-      if ((reset == 1'b0) && (enable == 1'b1))
-        q <= d;
+    parameter
+        width = 1,
+        reset_value = 0;
+
+    output reg [(width-1):0] q;
+    input  [(width-1):0] d;
+    input                clk, enable, reset;
+
+always@(posedge clk or posedge reset)
+  if (reset == 1'b1)
+    q <= reset_value;
+  else if (enable == 1'b1)
+    q <= d;
 endmodule // dffe
 
 //// ALU Code from Lab 5

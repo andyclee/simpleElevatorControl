@@ -16,14 +16,14 @@ module display_adapter(led, floor_seg, dir_seg, direction, current_floor, open);
 
 	DecimalDigitDecoder ddec(ddecIn, , , , , ddecOut);
 	BCDToLED bcdLed(ddecOut, floor_seg, );
-	assign downSeg[0] = 1;
-	assign downSeg[1] = 1;
-	assign downSeg[2] = 1;
-	assign downSeg[6:3] = 0;
-	assign upSeg[4] = 1;
-	assign upSeg[5] = 1;
-	assign upSeg[6] = 1;
-	assign upSeg[3:0] = 0;
+	assign downSeg[0] = 0;
+	assign downSeg[1] = 0;
+	assign downSeg[5] = 0;
+	assign downSeg[6] = 1;
+	assign downSeg[4:2] = 1;
+	assign upSeg[4:2] = 0;
+	assign upSeg[1:0] = 1;
+	assign upSeg[6:5] = 1;
 	mux2v dirMux(dir_seg, downSeg, upSeg, direction);
 
 	assign led = open;
@@ -93,4 +93,3 @@ module DecimalDigitDecoder(
 		end
 	end
 endmodule
-

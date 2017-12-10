@@ -11,13 +11,14 @@ module controller(should_move, call_inside, call_up, call_down, cur_floor_out, d
 	output direction;
 	output should_move;
 
-	input [7:0] call_inside, call_up, call_down;
+	output [7:0] call_inside, call_up, call_down;
 	input [2:0] write_floor;
 	input [2:0] cur_floor_in;
 	input 	    in_out, call_dir;
 	input	    floor_called, floor_reached;
+	input clk, reset;
 
-	wire [7:0] call_all;
+	wire [7:0] call_all, rf_call_up, rf_call_down, rf_call_inside;
 	wire [5:0] wr_data;
 	wire curr_dir;
 
@@ -26,13 +27,23 @@ module controller(should_move, call_inside, call_up, call_down, cur_floor_out, d
 	assign wr_data[4] = call_dir;
 	assign wr_data[5] = floor_called & ~floor_reached;
 
-	regfile rf(call_inside, call_up, call_down, wr_data, wr_floor, clk, reset);
-	or cfCombinedMask(call_all, call_inside, call_up, call_down);
+	regfile rf(rf_call_inside, rf_call_up, rf_call_down, wr_data, wr_floor, clk, reset);
+	assign call_all[1] = rf_call_up[1] | rf_call_down[1] | rf_call_inside[1];
+    assign call_all[2] = rf_call_up[2] | rf_call_down[2] | rf_call_inside[2];
+    assign call_all[3] = rf_call_up[3] | rf_call_down[3] | rf_call_inside[3];
+    assign call_all[4] = rf_call_up[4] | rf_call_down[4] | rf_call_inside[4];
+    assign call_all[5] = rf_call_up[5] | rf_call_down[5] | rf_call_inside[5];
+    assign call_all[6] = rf_call_up[6] | rf_call_down[6] | rf_call_inside[6];
+    assign call_all[7] = rf_call_up[7] | rf_call_down[7] | rf_call_inside[7];
 
 	//Used for calculation and display
 	register #(3, 0) currentFloor(cur_floor_out, cur_floor_in, 1'b1, clk, reset);
 
-	DirectionCalculator dc(direction, should_move, cur_floor_out, call_all);
+	DirectionCalculator dc(direction, should_move, call_all, cur_floor_out, clk, reset);
+	
+	assign call_inside = rf_call_inside;
+	assign call_up = rf_call_up;
+	assign call_down = rf_call_down;
 endmodule //controller
 
 //call_down/call_up is the direction of the elevator call (up/down) (dpad button
@@ -43,10 +54,11 @@ endmodule //controller
 //out_floor is floor called from outside (Switches 2:0)
 //floorCalled is whether a floor was called at all
 //call_dir is 1 if called up, 0 if called down
-module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call_up, call_out, button_call, in_floor, out_floor);
-	output [3:0] write_floor;
+module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call_up, button_call, in_floor, out_floor);
+	output [2:0] write_floor;
 	output in_out;
 	output call_dir;
+	output floorCalled;
 	input call_up, call_down;
 	input button_call;
 	input [3:0] in_floor, out_floor;
@@ -58,4 +70,3 @@ module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call
 	mux2v wfMux(write_floor, out_floor, in_floor, in_out);
 	assign call_dir = call_up;
 endmodule //input_manager
-
