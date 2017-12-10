@@ -9,10 +9,10 @@ module display_adapter(led, floor_seg, dir_seg, direction, current_floor, open);
 	wire [15:0] ddecIn;
 	wire [3:0] ddecOut;
 	wire [6:0] downSeg;
-	wire 6:0] upSeg;
+	wire [6:0] upSeg;
 
-	assign [15:4] ddecIn = 0;
-	assign [3:0] ddecIn = current_floor;
+	assign ddecIn[15:4] = 0;
+	assign ddecIn[3:0] = current_floor;
 
 	DecimalDigitDecoder ddec(ddecIn, , , , , ddecOut);
 	BCDToLED bcdLed(ddecOut, floor_seg, );
@@ -93,3 +93,4 @@ module DecimalDigitDecoder(
 		end
 	end
 endmodule
+
