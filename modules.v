@@ -89,8 +89,8 @@ module DirectionCalculator(goingUp, floorsCalled, currentFloor);
     input [2:0] currentFloor;
     input [7:0] floorsCalled;
 
-    wire [31:0] isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 ;
-    wire [31:0] isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 ;
+    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 ;
+    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 ;
     wire [31:0] lowerout0 , lowerout1 , lowerout2 , lowerout3 , lowerout4 , lowerout5 ;
     wire [31:0] upperout0 , upperout1 , upperout2 , upperout3 , upperout4 , upperout5 ;
     wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5, fcomp6;
@@ -131,6 +131,77 @@ module DirectionCalculator(goingUp, floorsCalled, currentFloor);
     assign goingUp = ~goingDown;
 
 endmodule // DirectionCalculator
+
+module DownCounter(count, floorsCalled, currentFloor);
+    output [31:0] count;
+    input [2:0] currentFloor;
+    input [7:0] floorsCalled;
+
+    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 ;
+    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 ;
+    wire [31:0] lowerout0 , lowerout1 , lowerout2 , lowerout3 , lowerout4 , lowerout5 ;
+    wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5, fcomp6;
+    // lower adders
+    alu32 la0(lowerout0, , , , isLower0, isLower1, `ALU_ADD);
+    alu32 la1(lowerout1, , , , isLower1, isLower2, `ALU_ADD);
+    alu32 la2(lowerout2, , , , isLower2, isLower3, `ALU_ADD);
+    alu32 la3(lowerout3, , , , isLower3, isLower4, `ALU_ADD);
+    alu32 la4(lowerout4, , , , isLower4, isLower5, `ALU_ADD);
+    alu32 la5(count, , , , isLower5, isLower6, `ALU_ADD);
+
+    // level comparators
+    alu32 comp0( , , , fcomp0, currentFloor, 32'b1, `ALU_SUB);
+    alu32 comp1( , , , fcomp1, currentFloor, 32'b10, `ALU_SUB);
+    alu32 comp2( , , , fcomp2, currentFloor, 32'b11, `ALU_SUB);
+    alu32 comp3( , , , fcomp3, currentFloor, 32'b100, `ALU_SUB);
+    alu32 comp4( , , , fcomp4, currentFloor, 32'b101, `ALU_SUB);
+    alu32 comp5( , , , fcomp5, currentFloor, 32'b110, `ALU_SUB);
+    alu32 comp6( , , , fcomp6, currentFloor, 32'b111, `ALU_SUB);
+    // decoders
+    decoder2 d0({isUpper0, isLower0}, 1'b1, ~fcomp0);
+    decoder2 d1({isUpper1, isLower1}, 1'b1, ~fcomp1);
+    decoder2 d2({isUpper2, isLower2}, 1'b1, ~fcomp2);
+    decoder2 d3({isUpper3, isLower3}, 1'b1, ~fcomp3);
+    decoder2 d4({isUpper4, isLower4}, 1'b1, ~fcomp4);
+    decoder2 d5({isUpper5, isLower5}, 1'b1, ~fcomp5);
+    decoder2 d6({isUpper6, isLower6}, 1'b1, ~fcomp6);
+endmodule // DirectionCalculator
+
+module UpperCounter(count, floorsCalled, currentFloor);
+    output [31:0] count;
+    input [2:0] currentFloor;
+    input [7:0] floorsCalled;
+
+    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 ;
+    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 ;
+    wire [31:0] upperout0 , upperout1 , upperout2 , upperout3 , upperout4 , upperout5 ;
+    wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5, fcomp6;
+
+    // upper adders
+    alu32 ua0(upperout0, , , , isUpper0, isUpper1, `ALU_ADD);
+    alu32 ua1(upperout1, , , , isUpper1, isUpper2, `ALU_ADD);
+    alu32 ua2(upperout2, , , , isUpper2, isUpper3, `ALU_ADD);
+    alu32 ua3(upperout3, , , , isUpper3, isUpper4, `ALU_ADD);
+    alu32 ua4(upperout4, , , , isUpper4, isUpper5, `ALU_ADD);
+    alu32 ua5(count, , , , isUpper5, isUpper6, `ALU_ADD);
+    // level comparators
+    alu32 comp0( , , , fcomp0, currentFloor, 32'b1, `ALU_SUB);
+    alu32 comp1( , , , fcomp1, currentFloor, 32'b10, `ALU_SUB);
+    alu32 comp2( , , , fcomp2, currentFloor, 32'b11, `ALU_SUB);
+    alu32 comp3( , , , fcomp3, currentFloor, 32'b100, `ALU_SUB);
+    alu32 comp4( , , , fcomp4, currentFloor, 32'b101, `ALU_SUB);
+    alu32 comp5( , , , fcomp5, currentFloor, 32'b110, `ALU_SUB);
+    alu32 comp6( , , , fcomp6, currentFloor, 32'b111, `ALU_SUB);
+    // decoders
+    decoder2 d0({isUpper0, isLower0}, 1'b1, ~fcomp0);
+    decoder2 d1({isUpper1, isLower1}, 1'b1, ~fcomp1);
+    decoder2 d2({isUpper2, isLower2}, 1'b1, ~fcomp2);
+    decoder2 d3({isUpper3, isLower3}, 1'b1, ~fcomp3);
+    decoder2 d4({isUpper4, isLower4}, 1'b1, ~fcomp4);
+    decoder2 d5({isUpper5, isLower5}, 1'b1, ~fcomp5);
+    decoder2 d6({isUpper6, isLower6}, 1'b1, ~fcomp6);
+endmodule // DirectionCalculator
+
 
 module FloorChecker(open, currentFloor, floorsCalled);
     output open;
