@@ -15,36 +15,39 @@ module display_adapter(led, floor_seg, dir_seg, direction, current_floor, open);
 	assign ddecIn[3:0] = current_floor;
 
 	DecimalDigitDecoder ddec(ddecIn, , , , , ddecOut);
-	BCDToLED bcdLed(ddecOut, floor_seg, );
-	assign downSeg[0] = 0;
-	assign downSeg[1] = 0;
-	assign downSeg[5] = 0;
+	BCDToLED bcdLed(floor_seg, ddecOut);
+	assign downSeg[4:2] = 0;
 	assign downSeg[6] = 1;
-	assign downSeg[4:2] = 1;
-	assign upSeg[4:2] = 0;
-	assign upSeg[1:0] = 1;
-	assign upSeg[6:5] = 1;
-	mux2v dirMux(dir_seg, downSeg, upSeg, direction);
+	assign downSeg[5] = 1;
+	assign downSeg[1] = 1;
+	assign downSeg[0] = 1;
+	assign upSeg[6] = 1;
+	assign upSeg[4] = 1;
+	assign upSeg[3] = 1;
+	assign upSeg[2] = 1;
+	assign upSeg[1] = 0;
+	assign upSeg[0] = 0;
+	assign upSeg[5] = 0;
+	mux2v dirMux(dir_seg, downSeg, upSeg, 1'b1);
 
 	assign led = open;
 
 endmodule //display_adapter
 
-module BCDToLED(
-	input [3:0] x, //wxyz
-	output [6:0] seg,
-	output [3:0] an );
+module BCDToLED (seg, x);
+    output [6:0] seg;
+    input  [3:0] x;
 
-	assign seg[0] = (x[2] & ~x[1] & ~x[0]) | (~x[3] & ~x[2] & ~x[1] & x[0]); //xy'z' + w'x'y'z
-	assign seg[1] = (x[2] & ~x[1] & x[0]) | (x[2] & x[1] & ~x[0]); //xy'z + xyz'
-	assign seg[2] = ~x[2] & x[1] & ~x[0]; //x'yz'
-	assign seg[3] = (x[2] & ~x[1] & ~x[0]) | (~x[3] & ~x[2] & ~x[1] & x[0]) | (x[2] & x[1] & x[0]); //xy'z' + w'x'y'z + xyz
-	assign seg[4] = (x[2] & ~x[1]) | x[0]; //xy' + z
-	assign seg[5] = (~x[3] & ~x[2] & x[0]) | (x[1] & x[0]) | (~x[2] & x[1]); //w'x'z + yz + x'y
-	assign seg[6] = (~x[3] & ~x[2] & ~x[1]) | (x[2] & x[1] & x[0]); //w'x'y' + xyz
+    assign seg[0] = (x[2] & ~x[1] & ~x[0]) | (~x[3] & ~x[2] & ~x[1] & x[0]);
+    assign seg[1] = (x[2] & ~x[1] & x[0]) | (x[2] & x[1] & ~x[0]);
+    assign seg[2] = (~x[2] & x[1] & ~x[0]);
+    assign seg[3] = (x[2] & ~x[1] & ~x[0]) | (~x[3] & ~x[2] & ~x[1] & x[0]) | (x[2] & x[1] & x[0]);
+    assign seg[4] = (x[2] & ~x[1]) | (x[0]);
+    assign seg[5] = (~x[3] & ~x[2] & x[0]) | (x[1] & x[0]) | (~x[2] & x[1]);
+    assign seg[6] = (~x[3] & ~x[2] & ~x[1]) | (x[2] & x[1] & x[0]);
 
-	assign an[3:0] = 4'b1110;
-endmodule
+
+endmodule // BCDtoLED
 
 module DecimalDigitDecoder(
 	input [15:0] binary,
