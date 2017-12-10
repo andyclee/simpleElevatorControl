@@ -6,55 +6,52 @@
 //to select the floor they wish to go to)
 //
 //Outputs current floor and direction for a top_level module to display
-module controller(current_floor, direction, switches, in_out, keypad, clk, reset);
-	output [2:0] current_floor;
+module controller(call_inside, call_outside, cur_floor_out, direction, cur_floor_in, write_floor, floor_called, in_out, clk, reset);
+	output [2:0] cur_floor_out;
+	output [7:0] call_inside, call_outside;
 	output direction;
 
-	input [2:0] switches;
-	input 	    in_out; //Last switch
-	input	    keypad;
+	input [2:0] write_floor;
+	input [2:0] cur_floor_in;
+	input 	    in_out;
+	input	    floor_called;
 
-	wire [7:0] call_mask, floors;
+	wire [7:0] call_all;
 	wire [4:0] wr_data;
-	wire [2:0] curFloorOut, tarFloorOut, curFloorIn, tarFloorIn;
-	wire currentDirection;
+	wire curr_dir;
 
-	assign wr_data[2:0] = switches;
-	assign wr_data[3] = //TODO: SOME KEYPAD INPUT (UP OR DOWN)
-	assign wr_data[4] = in_out;
+	assign wr_data[2:0] = write_floor;
+	assign wr_data[3] = in_out;
+	assign wr_data[4] = floor_called;
 
-	regfile(call_mask, floors, wr_data, switches, clk, reset);
+	regfile rf(call_inside, call_outside, wr_data, wr_floor, clk, reset);
+	or cfCombinedMask(call_all, call_inside, call_outside)
 
 	//Used for calculation and display
-	register #(3, 0) currentFloor(curFloorOut, curFloorIn, 1'b1, clk, reset);
-	register #(3, 0) targetFloor(tarFloorOut, tarFloorIn, 1'b1, clk, reset);
+	register #(3, 0) currentFloor(cur_floor_out, cur_floor_in, 1'b1, clk, reset);
 
-	movement_calculator mcalc(currentDirection, curFloorOut, tarFloorOut);
-
-	assign current_floor = curFloor;
+	directionCalculator dc(direction, cur_floor_out, call_all);
 endmodule; //controller
 
-//Given the current floor, call/floor masks, and current direction of travel,
-//returns the new target floor
-module floor_calculator(newTarget, currentFloor, direction, call_mask, floors);
-	output [2:0] newTarget;
-	input [2:0] currentFloor;
-	input [7:0] call_mask, floors;
-	input direction;
+//call_down/call_up is the direction of the elevator call (up/down) (dpad button
+//up/down)
+//in_out is 1 if button called from inside (last_switch)
+//button_call is whether button was pushed inside (dpad button center)
+//in_floor is the floor called from inside (Switches 5:3)
+//out_floor is floor called from outside (Switches 2:0)
+//floorCalled is whether a floor was called at all
+//
+//Button call and call_dir will never both have values
+module input_manager(write_floor, in_out, floorCalled, call_down, call_up, call_out, button_call, in_floor, out_floor);
+	output [3:0] write_floor;
+	output in_out;
+	input call_up, call_down, in_out;
+	input button_call;
+	input [3:0] in_floor, out_floor
 
-	//GENERAL ALGO:
-	//IF FLOORS IN DIRECTION TRAVELING HAVE ANY CALLS, 
-endmodule; //floor_calculator
+	wire floorCalled;
 
-//Calculates the direction in which the elevator should be moving
-//1 is up, 0 is down
-module  movement_calculator(direction, current_floor, target_floor);
-	output direction;
-	input [3:0] current_floor, target_floor;
-
-	wire notNeg;
-
-	alu32 floorLT( , , , notNeg, current_floor, target_floor, 3'h3);
-	assign direction = ~notNeg;
-
-endmodule //movement_calculator
+	assign in_out = call_up | call_down;
+	assign floorCalled = in_out | button_call;
+	mux2v wfMux(write_floor, out_floor, in_floor, in_out)
+endmodule; //input_manager
