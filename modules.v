@@ -94,7 +94,7 @@ module DirectionCalculator(direction, shouldMove, floorsCalled, currentFloor);
 
     DownCounter dc(count, floorsCalled, currentFloor);
 
-    assign choose_next
+    assign choose_next = 0;
 //    output goingUp;
 //    input [2:0] currentFloor;
 //    input [7:0] floorsCalled;
