@@ -124,9 +124,9 @@ module DirectionCalculator(direction, shouldMove, floorsCalled, currentFloor, cl
     assign shouldMove = (sDown | sUp);
     assign direction = sUp;
 
-    dffe #(1, 0) fsChoose(sChoose, choose_next, clock, 1'b1, 1'b0);
-    dffe #(1, 0) fsUp(sUp, up_next, clock, 1'b1, 1'b0);
-    dffe #(1, 0) fsDown(sDown, down_next, clock, 1'b1, 1'b0);
+    dffe #(1, 0) fsChoose(sChoose, choose_next, clock, 1'b1, reset);
+    dffe #(1, 0) fsUp(sUp, up_next, clock, 1'b1, reset);
+    dffe #(1, 0) fsDown(sDown, down_next, clock, 1'b1, reset);
 //    output goingUp;
 //    input [2:0] currentFloor;
 //    input [7:0] floorsCalled;
@@ -179,35 +179,40 @@ module DownCounter(count, floorsCalled, currentFloor);
     input [2:0] currentFloor;
     input [7:0] floorsCalled;
 
-    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 ;
-    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 ;
+    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 , isLower7 ;
+    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 , isUpper7 ;
     wire [31:0] lowerout0 , lowerout1 , lowerout2 , lowerout3 , lowerout4 , lowerout5 ;
-    wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5, fcomp6;
+    wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5 , fcomp6 , fcomp7 ;
+    
     // lower adders
-    alu32 la0(lowerout0, , , , isLower0, isLower1, `ALU_ADD);
-    alu32 la1(lowerout1, , , , lowerout0, isLower2, `ALU_ADD);
-    alu32 la2(lowerout2, , , , lowerout1, isLower3, `ALU_ADD);
-    alu32 la3(lowerout3, , , , lowerout2, isLower4, `ALU_ADD);
-    alu32 la4(lowerout4, , , , lowerout3, isLower5, `ALU_ADD);
-    alu32 la5(count, , , , lowerout4, isLower6, `ALU_ADD);
-
+    alu32 la0(lowerout0, , , , {31'b0, isLower0}, {31'b0, isLower1}, `ALU_ADD);
+    alu32 la1(lowerout1, , , , lowerout0, {31'b0, isLower2}, `ALU_ADD);
+    alu32 la2(lowerout2, , , , lowerout1, {31'b0, isLower3}, `ALU_ADD);
+    alu32 la3(lowerout3, , , , lowerout2, {31'b0, isLower4}, `ALU_ADD);
+    alu32 la4(lowerout4, , , , lowerout3, {31'b0, isLower5}, `ALU_ADD);
+    alu32 la5(lowerout5, , , , lowerout4, {31'b0, isLower6}, `ALU_ADD);
+    alu32 la6(count, , , , lowerout5, {31'b0, isLower7}, `ALU_ADD);
+    
     // level comparators
-    alu32 comp0( , , , fcomp0, currentFloor, 32'b1, `ALU_SUB);
-    alu32 comp1( , , , fcomp1, currentFloor, 32'b10, `ALU_SUB);
-    alu32 comp2( , , , fcomp2, currentFloor, 32'b11, `ALU_SUB);
-    alu32 comp3( , , , fcomp3, currentFloor, 32'b100, `ALU_SUB);
-    alu32 comp4( , , , fcomp4, currentFloor, 32'b101, `ALU_SUB);
-    alu32 comp5( , , , fcomp5, currentFloor, 32'b110, `ALU_SUB);
-    alu32 comp6( , , , fcomp6, currentFloor, 32'b111, `ALU_SUB);
-
+    alu32 comp0( , , , fcomp0, {24'b0, currentFloor}, 'b0, `ALU_SUB);
+    alu32 comp1( , , , fcomp1, {24'b0, currentFloor}, 'b1, `ALU_SUB);
+    alu32 comp2( , , , fcomp2, {24'b0, currentFloor}, 'b10, `ALU_SUB);
+    alu32 comp3( , , , fcomp3, {24'b0, currentFloor}, 'b11, `ALU_SUB);
+    alu32 comp4( , , , fcomp4, {24'b0, currentFloor}, 'b100, `ALU_SUB);
+    alu32 comp5( , , , fcomp5, {24'b0, currentFloor}, 'b101, `ALU_SUB);
+    alu32 comp6( , , , fcomp6, {24'b0, currentFloor}, 'b110, `ALU_SUB);
+    alu32 comp7( , , , fcomp7, {24'b0, currentFloor}, 'b111, `ALU_SUB);
+    
     // decoders
-    decoder2 d0({isUpper0, isLower0}, 1'b1, ~fcomp0);
-    decoder2 d1({isUpper1, isLower1}, 1'b1, ~fcomp1);
-    decoder2 d2({isUpper2, isLower2}, 1'b1, ~fcomp2);
-    decoder2 d3({isUpper3, isLower3}, 1'b1, ~fcomp3);
-    decoder2 d4({isUpper4, isLower4}, 1'b1, ~fcomp4);
-    decoder2 d5({isUpper5, isLower5}, 1'b1, ~fcomp5);
-    decoder2 d6({isUpper6, isLower6}, 1'b1, ~fcomp6);
+    decoder2 d0({isUpper0, isLower0}, 'b1, ~fcomp0);
+    decoder2 d1({isUpper1, isLower1}, 'b1, ~fcomp1);
+    decoder2 d2({isUpper2, isLower2}, 'b1, ~fcomp2);
+    decoder2 d3({isUpper3, isLower3}, 'b1, ~fcomp3);
+    decoder2 d4({isUpper4, isLower4}, 'b1, ~fcomp4);
+    decoder2 d5({isUpper5, isLower5}, 'b1, ~fcomp5);
+    decoder2 d6({isUpper6, isLower6}, 'b1, ~fcomp6);
+    decoder2 d7({isUpper7, isLower7}, 'b1, ~fcomp7);
+
 endmodule // LowerCounter
 
 module UpperCounter(count, floorsCalled, currentFloor);
@@ -215,32 +220,37 @@ module UpperCounter(count, floorsCalled, currentFloor);
     input [2:0] currentFloor;
     input [7:0] floorsCalled;
 
-    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 ;
-    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 ;
+    wire isLower0 , isLower1 , isLower2 , isLower3 , isLower4 , isLower5 , isLower6 , isLower7 ;
+    wire isUpper0 , isUpper1 , isUpper2 , isUpper3 , isUpper4 , isUpper5 , isUpper6 , isUpper7 ;
     wire [31:0] upperout0 , upperout1 , upperout2 , upperout3 , upperout4 , upperout5 ;
-    wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5, fcomp6;
-
-    // upper adders
-    alu32 ua0(upperout0, , , , isUpper0, isUpper1, `ALU_ADD);
-    alu32 ua1(upperout1, , , , upperout0, isUpper2, `ALU_ADD);
-    alu32 ua2(upperout2, , , , upperout1, isUpper3, `ALU_ADD);
-    alu32 ua3(upperout3, , , , upperout2, isUpper4, `ALU_ADD);
-    alu32 ua4(upperout4, , , , upperout3, isUpper5, `ALU_ADD);
-    alu32 ua5(count, , , , upperout4, isUpper6, `ALU_ADD);
+    wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5 , fcomp6 , fcomp7 ;
+    
+// upper adders
+    alu32 ua0(upperout0, , , , {31'b0, isUpper0}, {31'b0, isUpper1}, `ALU_ADD);
+    alu32 ua1(upperout1, , , , upperout0, {31'b0, isUpper2}, `ALU_ADD);
+    alu32 ua2(upperout2, , , , upperout1, {31'b0, isUpper3}, `ALU_ADD);
+    alu32 ua3(upperout3, , , , upperout2, {31'b0, isUpper4}, `ALU_ADD);
+    alu32 ua4(upperout4, , , , upperout3, {31'b0, isUpper5}, `ALU_ADD);
+    alu32 ua5(upperout5, , , , upperout4, {31'b0, isUpper6}, `ALU_ADD);
+    alu32 ua6(count, , , , upperout5, {31'b0, isUpper7}, `ALU_ADD);
+    
     // level comparators
-    alu32 comp0( , , , fcomp0, currentFloor, 32'b1, `ALU_SUB);
-    alu32 comp1( , , , fcomp1, currentFloor, 32'b10, `ALU_SUB);
-    alu32 comp2( , , , fcomp2, currentFloor, 32'b11, `ALU_SUB);
-    alu32 comp3( , , , fcomp3, currentFloor, 32'b100, `ALU_SUB);
-    alu32 comp4( , , , fcomp4, currentFloor, 32'b101, `ALU_SUB);
-    alu32 comp5( , , , fcomp5, currentFloor, 32'b110, `ALU_SUB);
-    alu32 comp6( , , , fcomp6, currentFloor, 32'b111, `ALU_SUB);
+    alu32 comp0( , , , fcomp0, {24'b0, currentFloor}, 'b0, `ALU_SUB);
+    alu32 comp1( , , , fcomp1, {24'b0, currentFloor}, 'b1, `ALU_SUB);
+    alu32 comp2( , , , fcomp2, {24'b0, currentFloor}, 'b10, `ALU_SUB);
+    alu32 comp3( , , , fcomp3, {24'b0, currentFloor}, 'b11, `ALU_SUB);
+    alu32 comp4( , , , fcomp4, {24'b0, currentFloor}, 'b100, `ALU_SUB);
+    alu32 comp5( , , , fcomp5, {24'b0, currentFloor}, 'b101, `ALU_SUB);
+    alu32 comp6( , , , fcomp6, {24'b0, currentFloor}, 'b110, `ALU_SUB);
+    alu32 comp7( , , , fcomp7, {24'b0, currentFloor}, 'b111, `ALU_SUB);
+    
     // decoders
-    decoder2 d0({isUpper0, isLower0}, 1'b1, ~fcomp0);
-    decoder2 d1({isUpper1, isLower1}, 1'b1, ~fcomp1);
-    decoder2 d2({isUpper2, isLower2}, 1'b1, ~fcomp2);
-    decoder2 d3({isUpper3, isLower3}, 1'b1, ~fcomp3);
-    decoder2 d4({isUpper4, isLower4}, 1'b1, ~fcomp4);
-    decoder2 d5({isUpper5, isLower5}, 1'b1, ~fcomp5);
-    decoder2 d6({isUpper6, isLower6}, 1'b1, ~fcomp6);
+    decoder2 d0({isUpper0, isLower0}, 'b1, ~fcomp0);
+    decoder2 d1({isUpper1, isLower1}, 'b1, ~fcomp1);
+    decoder2 d2({isUpper2, isLower2}, 'b1, ~fcomp2);
+    decoder2 d3({isUpper3, isLower3}, 'b1, ~fcomp3);
+    decoder2 d4({isUpper4, isLower4}, 'b1, ~fcomp4);
+    decoder2 d5({isUpper5, isLower5}, 'b1, ~fcomp5);
+    decoder2 d6({isUpper6, isLower6}, 'b1, ~fcomp6);
+    decoder2 d7({isUpper7, isLower7}, 'b1, ~fcomp7);
 endmodule // UpperCounter
