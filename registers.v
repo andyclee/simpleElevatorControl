@@ -68,3 +68,4 @@ module regfile(call_inside, call_up, call_down, wr_data, wr_regnum, clk, reset);
 	assign call_down[7] = ~regOut[7][3] & ~regOut[7][4] & regOut[7][5];
 
 endmodule //register
+

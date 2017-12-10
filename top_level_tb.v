@@ -17,7 +17,11 @@ module top_level_tb(
     initial
     begin
            resetBtn = 1;
-           #10;
+           sw_in[5:0] = 0;
+           button_up_in = 0;
+           button_down_in = 0;
+           button_in_in = 0;
+           #20;
            
            resetBtn = 0;
            sw_in[5:3] = 3'b1;

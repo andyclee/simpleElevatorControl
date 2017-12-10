@@ -93,3 +93,4 @@ module DecimalDigitDecoder(
 		end
 	end
 endmodule
+
