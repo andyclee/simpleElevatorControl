@@ -5,6 +5,19 @@
 `define ALU_NOR    3'h6
 `define ALU_XOR    3'h7
 
+module dffe(q, d, clk, enable, reset);
+    output q;
+    reg    q;
+    input  d;
+    input  clk, enable, reset;
+    always@(reset)
+      if (reset == 1'b1)
+        q <= 0;
+    always@(posedge clk)
+      if ((reset == 1'b0) && (enable == 1'b1))
+        q <= d;
+endmodule // dffe
+
 //// ALU Code from Lab 5
 module alu32(out, overflow, zero, negative, inA, inB, control);
     output [31:0] out;
@@ -84,17 +97,35 @@ module mux4v(out, A, B, C, D, sel);
 
 endmodule // mux4v
 
-module DirectionCalculator(direction, shouldMove, floorsCalled, currentFloor);
+module DirectionCalculator(direction, shouldMove, floorsCalled, currentFloor, clock, reset);
     // implement a FSM
     output direction, shouldMove;
-    input floorsCalled, currentFloor;
+    input [7:0] floorsCalled;
+    input [2:0] currentFloor;
+    input clock, reset;
     wire sChoose, sDown, sUp;
     wire choose_next, down_next, up_next;
-    wire dcount, acount;
+    wire [31:0] dcount, ucount;
+    //wire [31:0] diff;
+    wire above0, below0, negDiff;
 
-    DownCounter dc(count, floorsCalled, currentFloor);
+    DownCounter dc(dcount, floorsCalled, currentFloor);
+    UpperCounter uc(ucount, floorsCalled, currentFloor);
 
-    assign choose_next = 0;
+    assign above0 = ucount == 0;
+    assign below0 = dcount == 0;
+    alu32 a(, , , negDiff, dcount, ucount, `ALU_SUB);
+
+    assign choose_next = (sChoose & above0 & below0) | (sDown & below0) | (sUp & above0);
+    assign down_next = (sChoose & negDiff) | (sDown & ~below0);
+    assign up_next = (sChoose & ~negDiff & ~above0) | (sUp & ~above0);
+
+    assign shouldMove = (sDown | sUp);
+    assign direction = sUp;
+
+    dffe fsChoose(sChoose, choose_next, clock, 1'b1, 1'b0);
+    dffe fsUp(sUp, up_next, clock, 1'b1, 1'b0);
+    dffe fsDown(sDown, down_next, clock, 1'b1, 1'b0);
 //    output goingUp;
 //    input [2:0] currentFloor;
 //    input [7:0] floorsCalled;
@@ -153,11 +184,11 @@ module DownCounter(count, floorsCalled, currentFloor);
     wire fcomp0 , fcomp1 , fcomp2 , fcomp3 , fcomp4 , fcomp5, fcomp6;
     // lower adders
     alu32 la0(lowerout0, , , , isLower0, isLower1, `ALU_ADD);
-    alu32 la1(lowerout1, , , , isLower1, isLower2, `ALU_ADD);
-    alu32 la2(lowerout2, , , , isLower2, isLower3, `ALU_ADD);
-    alu32 la3(lowerout3, , , , isLower3, isLower4, `ALU_ADD);
-    alu32 la4(lowerout4, , , , isLower4, isLower5, `ALU_ADD);
-    alu32 la5(count, , , , isLower5, isLower6, `ALU_ADD);
+    alu32 la1(lowerout1, , , , lowerout0, isLower2, `ALU_ADD);
+    alu32 la2(lowerout2, , , , lowerout1, isLower3, `ALU_ADD);
+    alu32 la3(lowerout3, , , , lowerout2, isLower4, `ALU_ADD);
+    alu32 la4(lowerout4, , , , lowerout3, isLower5, `ALU_ADD);
+    alu32 la5(count, , , , lowerout4, isLower6, `ALU_ADD);
 
     // level comparators
     alu32 comp0( , , , fcomp0, currentFloor, 32'b1, `ALU_SUB);
@@ -175,7 +206,7 @@ module DownCounter(count, floorsCalled, currentFloor);
     decoder2 d4({isUpper4, isLower4}, 1'b1, ~fcomp4);
     decoder2 d5({isUpper5, isLower5}, 1'b1, ~fcomp5);
     decoder2 d6({isUpper6, isLower6}, 1'b1, ~fcomp6);
-endmodule // DirectionCalculator
+endmodule // LowerCounter
 
 module UpperCounter(count, floorsCalled, currentFloor);
     output [31:0] count;
@@ -189,11 +220,11 @@ module UpperCounter(count, floorsCalled, currentFloor);
 
     // upper adders
     alu32 ua0(upperout0, , , , isUpper0, isUpper1, `ALU_ADD);
-    alu32 ua1(upperout1, , , , isUpper1, isUpper2, `ALU_ADD);
-    alu32 ua2(upperout2, , , , isUpper2, isUpper3, `ALU_ADD);
-    alu32 ua3(upperout3, , , , isUpper3, isUpper4, `ALU_ADD);
-    alu32 ua4(upperout4, , , , isUpper4, isUpper5, `ALU_ADD);
-    alu32 ua5(count, , , , isUpper5, isUpper6, `ALU_ADD);
+    alu32 ua1(upperout1, , , , upperout0, isUpper2, `ALU_ADD);
+    alu32 ua2(upperout2, , , , upperout1, isUpper3, `ALU_ADD);
+    alu32 ua3(upperout3, , , , upperout2, isUpper4, `ALU_ADD);
+    alu32 ua4(upperout4, , , , upperout3, isUpper5, `ALU_ADD);
+    alu32 ua5(count, , , , upperout4, isUpper6, `ALU_ADD);
     // level comparators
     alu32 comp0( , , , fcomp0, currentFloor, 32'b1, `ALU_SUB);
     alu32 comp1( , , , fcomp1, currentFloor, 32'b10, `ALU_SUB);
@@ -210,4 +241,4 @@ module UpperCounter(count, floorsCalled, currentFloor);
     decoder2 d4({isUpper4, isLower4}, 1'b1, ~fcomp4);
     decoder2 d5({isUpper5, isLower5}, 1'b1, ~fcomp5);
     decoder2 d6({isUpper6, isLower6}, 1'b1, ~fcomp6);
-endmodule // DirectionCalculator
+endmodule // UpperCounter
