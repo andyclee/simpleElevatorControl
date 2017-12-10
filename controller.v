@@ -70,3 +70,4 @@ module input_manager(write_floor, in_out, call_dir, floorCalled, call_down, call
 	mux2v wfMux(write_floor, out_floor, in_floor, in_out);
 	assign call_dir = call_up;
 endmodule //input_manager
+
